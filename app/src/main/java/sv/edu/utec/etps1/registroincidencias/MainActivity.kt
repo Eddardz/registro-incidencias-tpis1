@@ -3,8 +3,10 @@ package sv.edu.utec.etps1.registroincidencias
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import sv.edu.utec.etps1.registroincidencias.ui.theme.RegistroIncidenciasTheme
@@ -51,6 +57,10 @@ fun RegistroIncidenciasApp() {
 
     var mensaje by remember {
         mutableStateOf("Aún no hay reporte creado")
+    }
+
+    var prioridad by remember {
+        mutableStateOf("No seleccionada")
     }
 
     Column(
@@ -95,7 +105,11 @@ fun RegistroIncidenciasApp() {
                     label = {
                         Text("Título")
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Next
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -106,7 +120,72 @@ fun RegistroIncidenciasApp() {
                     label = {
                         Text("Descripción")
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Done
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Selecciona una prioridad:",
+                    style = MaterialTheme.typography.titleSmall
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                prioridad = "Baja"
+                            }
+                    ) {
+                        Text(
+                            text = "Baja",
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                prioridad = "Media"
+                            }
+                    ) {
+                        Text(
+                            text = "Media",
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                prioridad = "Alta"
+                            }
+                    ) {
+                        Text(
+                            text = "Alta",
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Prioridad seleccionada: $prioridad"
                 )
             }
         }

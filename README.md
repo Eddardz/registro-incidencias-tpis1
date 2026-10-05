@@ -59,3 +59,20 @@ El proyecto puede abrirse desde Android Studio y ejecutarse en un emulador o dis
 Eduardo Carranza
 
 Proyecto académico — UTEC
+
+Semana 10 — Teclado y pantalla táctil
+
+En esta semana se mejoró la aplicación RegistroIncidencias para adaptar la entrada de texto y la interacción táctil al contexto de uso.
+
+Cambios realizados
+
+Se configuró KeyboardOptions en los campos de Título y Descripción.
+Se agregó capitalización de oraciones para facilitar la escritura.
+Se configuró ImeAction.Next en el campo Título.
+Se configuró ImeAction.Done en el campo Descripción.
+Se agregó la selección de prioridad mediante las opciones Baja, Media y Alta.
+Se utilizó clickable para implementar la interacción táctil.
+Se agregó retroalimentación visible mostrando la prioridad seleccionada.
+Se verificó el funcionamiento de la aplicación en un dispositivo físico.
+
+Commit de la Semana 10: Semana 10: teclado contextual e interacción táctil
