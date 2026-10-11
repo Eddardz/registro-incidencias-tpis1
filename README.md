@@ -78,7 +78,7 @@ Se verificó el funcionamiento de la aplicación en un dispositivo físico.
 Commit de la Semana 10: Semana 10: teclado contextual e interacción táctil
 
 
-## Semana 11 — Integración de sensor
+Semana 11 — Integración de sensor
 
 ### Objetivo
 Integrar el acelerómetro del dispositivo en la aplicación RegistroIncidencias para mostrar lecturas de movimiento en los ejes X, Y y Z.
