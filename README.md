@@ -76,3 +76,26 @@ Se agregó retroalimentación visible mostrando la prioridad seleccionada.
 Se verificó el funcionamiento de la aplicación en un dispositivo físico.
 
 Commit de la Semana 10: Semana 10: teclado contextual e interacción táctil
+
+
+## Semana 11 — Integración de sensor
+
+### Objetivo
+Integrar el acelerómetro del dispositivo en la aplicación RegistroIncidencias para mostrar lecturas de movimiento en los ejes X, Y y Z.
+
+### Implementación
+Se utilizó SensorManager para obtener el acelerómetro y SensorEventListener para recibir sus lecturas. Los valores se muestran en la pantalla en metros por segundo al cuadrado (m/s²).
+
+La aplicación también contempla el caso en que el dispositivo no tenga un acelerómetro disponible o no se pueda iniciar la lectura.
+
+### Pruebas realizadas
+- Se ejecutó la aplicación en un dispositivo físico.
+- Se verificó la visualización de los valores X, Y y Z.
+- Se movió el teléfono para comprobar que las lecturas cambiaran.
+- Se verificó que el formulario, la selección de prioridad y el botón de crear reporte siguieran funcionando.
+
+### Limitaciones
+Las lecturas pueden presentar pequeñas variaciones incluso cuando el teléfono permanece quieto, debido a la gravedad y a las fluctuaciones del sensor.
+
+### Mejora futura
+Como mejora futura, se podría aplicar un promedio de varias lecturas para reducir las variaciones y presentar valores más estables.

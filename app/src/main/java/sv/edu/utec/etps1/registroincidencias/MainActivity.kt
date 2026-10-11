@@ -1,5 +1,11 @@
+
 package sv.edu.utec.etps1.registroincidencias
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,25 +18,30 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import sv.edu.utec.etps1.registroincidencias.ui.theme.RegistroIncidenciasTheme
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,30 +58,97 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun RegistroIncidenciasApp() {
 
-    var titulo by remember {
-        mutableStateOf("")
-    }
-
-    var descripcion by remember {
-        mutableStateOf("")
-    }
-
+    var titulo by remember { mutableStateOf("") }
+    var descripcion by remember { mutableStateOf("") }
     var mensaje by remember {
         mutableStateOf("Aún no hay reporte creado")
     }
-
     var prioridad by remember {
         mutableStateOf("No seleccionada")
+    }
+
+    var valoresSensor by remember {
+        mutableStateOf("Esperando lectura del acelerómetro...")
+    }
+    var sensorDisponible by remember {
+        mutableStateOf(false)
+    }
+
+    val context = LocalContext.current
+
+    DisposableEffect(context) {
+        val sensorManager = context.getSystemService(
+            Context.SENSOR_SERVICE
+        ) as SensorManager
+
+        val acelerometro = sensorManager.getDefaultSensor(
+            Sensor.TYPE_ACCELEROMETER
+        )
+
+        // Se declara fuera del if para que onDispose pueda acceder.
+        var listener: SensorEventListener? = null
+
+        if (acelerometro == null) {
+            sensorDisponible = false
+            valoresSensor =
+                "Acelerómetro no disponible en este dispositivo."
+        } else {
+            val sensorListener = object : SensorEventListener {
+
+                override fun onSensorChanged(event: SensorEvent) {
+                    val x = event.values[0]
+                    val y = event.values[1]
+                    val z = event.values[2]
+
+                    valoresSensor = String.format(
+                        Locale.getDefault(),
+                        "X: %.2f m/s²\nY: %.2f m/s²\nZ: %.2f m/s²",
+                        x,
+                        y,
+                        z
+                    )
+                }
+
+                override fun onAccuracyChanged(
+                    sensor: Sensor?,
+                    accuracy: Int
+                ) {
+                    // No se necesita realizar una acción adicional.
+                }
+            }
+
+            listener = sensorListener
+
+            val registrado = sensorManager.registerListener(
+                sensorListener,
+                acelerometro,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
+
+            if (registrado) {
+                sensorDisponible = true
+            } else {
+                sensorDisponible = false
+                valoresSensor =
+                    "No se pudo iniciar la lectura del acelerómetro."
+            }
+        }
+
+        onDispose {
+            listener?.let {
+                sensorManager.unregisterListener(it)
+            }
+        }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = "Reporte de recolección de basura",
             style = MaterialTheme.typography.headlineMedium
@@ -85,13 +163,8 @@ fun RegistroIncidenciasApp() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "Nuevo reporte",
                     style = MaterialTheme.typography.titleMedium
@@ -102,9 +175,7 @@ fun RegistroIncidenciasApp() {
                 OutlinedTextField(
                     value = titulo,
                     onValueChange = { titulo = it },
-                    label = {
-                        Text("Título")
-                    },
+                    label = { Text("Título") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
@@ -117,9 +188,7 @@ fun RegistroIncidenciasApp() {
                 OutlinedTextField(
                     value = descripcion,
                     onValueChange = { descripcion = it },
-                    label = {
-                        Text("Descripción")
-                    },
+                    label = { Text("Descripción") },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
@@ -141,13 +210,10 @@ fun RegistroIncidenciasApp() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-
                     Card(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable {
-                                prioridad = "Baja"
-                            }
+                            .clickable { prioridad = "Baja" }
                     ) {
                         Text(
                             text = "Baja",
@@ -158,9 +224,7 @@ fun RegistroIncidenciasApp() {
                     Card(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable {
-                                prioridad = "Media"
-                            }
+                            .clickable { prioridad = "Media" }
                     ) {
                         Text(
                             text = "Media",
@@ -171,9 +235,7 @@ fun RegistroIncidenciasApp() {
                     Card(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable {
-                                prioridad = "Alta"
-                            }
+                            .clickable { prioridad = "Alta" }
                     ) {
                         Text(
                             text = "Alta",
@@ -184,9 +246,32 @@ fun RegistroIncidenciasApp() {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                Text(text = "Prioridad seleccionada: $prioridad")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Prioridad seleccionada: $prioridad"
+                    text = "Sensor de movimiento",
+                    style = MaterialTheme.typography.titleMedium
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = if (sensorDisponible) {
+                        "Acelerómetro disponible"
+                    } else {
+                        "Estado del acelerómetro"
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(text = valoresSensor)
             }
         }
 
@@ -194,7 +279,11 @@ fun RegistroIncidenciasApp() {
 
         Button(
             onClick = {
-                mensaje = "Reporte preparado: $titulo"
+                mensaje = if (titulo.isBlank()) {
+                    "Ingresa un título para el reporte"
+                } else {
+                    "Reporte preparado: $titulo"
+                }
             }
         ) {
             Text("Crear reporte")
@@ -202,15 +291,11 @@ fun RegistroIncidenciasApp() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = mensaje
-        )
+        Text(text = mensaje)
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text(
-            text = "Prototipo inicial — Unidad 1"
-        )
+        Text(text = "Prototipo inicial — Unidad 1")
     }
 }
 
