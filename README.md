@@ -99,3 +99,24 @@ Las lecturas pueden presentar pequeñas variaciones incluso cuando el teléfono 
 
 ### Mejora futura
 Como mejora futura, se podría aplicar un promedio de varias lecturas para reducir las variaciones y presentar valores más estables.
+
+
+## Práctica integradora: diagnóstico del dispositivo
+
+### Objetivo
+Integrar una sección de diagnóstico en RegistroIncidencias utilizando el acelerómetro del dispositivo.
+
+### Implementación
+Se utilizó SensorManager y SensorEventListener para obtener las lecturas de los ejes X, Y y Z. También se agregó una interpretación aproximada de los cambios de aceleración y un mensaje para indicar el estado del sensor.
+
+### Pruebas realizadas
+- Se ejecutó la aplicación en un dispositivo físico.
+- Se verificaron los valores X, Y y Z.
+- Se comprobó la interpretación al mover el teléfono.
+- Se mantuvieron las funciones del formulario de reportes.
+
+### Limitaciones
+La interpretación es aproximada. La gravedad, la orientación y las variaciones del sensor pueden afectar los resultados.
+
+### Mejora futura
+Se podría calcular el promedio de varias lecturas para obtener resultados más estables.

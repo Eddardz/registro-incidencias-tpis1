@@ -42,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import sv.edu.utec.etps1.registroincidencias.ui.theme.RegistroIncidenciasTheme
 import java.util.Locale
+import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,9 +61,11 @@ fun RegistroIncidenciasApp() {
 
     var titulo by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
+
     var mensaje by remember {
         mutableStateOf("Aún no hay reporte creado")
     }
+
     var prioridad by remember {
         mutableStateOf("No seleccionada")
     }
@@ -70,6 +73,11 @@ fun RegistroIncidenciasApp() {
     var valoresSensor by remember {
         mutableStateOf("Esperando lectura del acelerómetro...")
     }
+
+    var interpretacionSensor by remember {
+        mutableStateOf("Esperando datos para realizar el diagnóstico.")
+    }
+
     var sensorDisponible by remember {
         mutableStateOf(false)
     }
@@ -85,13 +93,14 @@ fun RegistroIncidenciasApp() {
             Sensor.TYPE_ACCELEROMETER
         )
 
-        // Se declara fuera del if para que onDispose pueda acceder.
         var listener: SensorEventListener? = null
 
         if (acelerometro == null) {
             sensorDisponible = false
             valoresSensor =
                 "Acelerómetro no disponible en este dispositivo."
+            interpretacionSensor =
+                "No es posible realizar el diagnóstico sin el sensor."
         } else {
             val sensorListener = object : SensorEventListener {
 
@@ -107,6 +116,21 @@ fun RegistroIncidenciasApp() {
                         y,
                         z
                     )
+
+                    // Calcula la magnitud total de la aceleración.
+                    val magnitud = sqrt(
+                        x * x + y * y + z * z
+                    )
+
+                    // Aproximadamente 9.81 m/s² corresponde
+                    // a la gravedad cuando el teléfono está quieto.
+                    interpretacionSensor = if (
+                        magnitud < 8.5f || magnitud > 11.2f
+                    ) {
+                        "Movimiento o cambio de aceleración detectado."
+                    } else {
+                        "Sin cambios significativos de aceleración."
+                    }
                 }
 
                 override fun onAccuracyChanged(
@@ -131,6 +155,8 @@ fun RegistroIncidenciasApp() {
                 sensorDisponible = false
                 valoresSensor =
                     "No se pudo iniciar la lectura del acelerómetro."
+                interpretacionSensor =
+                    "El diagnóstico no está disponible."
             }
         }
 
@@ -255,7 +281,7 @@ fun RegistroIncidenciasApp() {
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Sensor de movimiento",
+                    text = "Diagnóstico del dispositivo",
                     style = MaterialTheme.typography.titleMedium
                 )
 
@@ -263,15 +289,29 @@ fun RegistroIncidenciasApp() {
 
                 Text(
                     text = if (sensorDisponible) {
-                        "Acelerómetro disponible"
+                        "Estado: Acelerómetro disponible"
                     } else {
-                        "Estado del acelerómetro"
+                        "Estado: Sensor no disponible o sin lectura"
                     }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Lecturas del acelerómetro",
+                    style = MaterialTheme.typography.titleSmall
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(text = valoresSensor)
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Interpretación: $interpretacionSensor",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
 
